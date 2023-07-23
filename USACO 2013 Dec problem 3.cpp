@@ -12,28 +12,20 @@ int n;
 vector<pair<int,int>> x;
 map<int,int> closest;
 int r_answer = 0;
+using namespace std;
 void simu(map<int,int> need) {
-    set<int> check;
-    for (auto i : need) {
-        cout << i.first << ' ' << i.second << '\n';
-    }
-    int start = 0;
-    while (1) {
-        cout << start << '\n';
-        if (check.find(start) != check.end()) {
-            r_answer +=1;
-            break;
+    need[-1] = -1;
+    for (int start=0; start<n; start++) {
+        int pos = start;
+        for (int count=0; count<n; count++) {
+            pos = closest[need[pos]];
         }
-        check.insert(start);
-        start = need[start];
-        cout << start << '\n';
-        if (closest[start] == -1) {
-            break;
+        if (pos != -1)  {
+            r_answer += 1;
+            return;
         }
-        check.insert(start);
-        start = closest[start];
     }
-    cout << "kl\n";
+  return;
 }
 void answer(map<int,int> pais,set<int> check) {
     if (check.size() == x.size()) {
@@ -68,6 +60,7 @@ int32_t main(void) {
         x.push_back(make_pair(temp,temp2));
         closest[i] = -1;
     }
+    closest[-1] = -1;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n ; j++) {
             if (i == j) {
@@ -86,10 +79,10 @@ int32_t main(void) {
             }
         }
     }
-    for (auto i : closest) {
-        cout << i.first << ' '  << i.second << '\n';
-    }
-    cout << "lk" << '\n';
+    //for (auto i : closest) {
+        //cout << i.first << ' '  << i.second << '\n';
+    //}
+    //cout << "lk" << '\n';
     answer(map<int,int>(), set<int>());
-    cout << r_answer << '\n';
+    cout << r_answer/2 << '\n';
 }
