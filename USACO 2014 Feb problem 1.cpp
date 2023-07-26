@@ -1,52 +1,49 @@
 #include <iostream>
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
+#include <map>
 #include <set>
 #include <algorithm>
-#include <stdio.h>
-#include <map>
 using namespace std;
- 
-typedef long long ll;
-# define int ll
-vector<string> grid;
-set<pair<int,int>> lk;
 int n,m;
-int look(pair<int,int> temp, int cur, int state) {
-    cout << temp.first << ' ' << temp.second << ' ' << cur << '\n';
-    if (temp.first >= n || temp.second >= m || temp.first < 0 || temp.second < 0 || lk.find(temp) != lk.end()) {
-        return cur;
-    }
-    lk.insert(temp);
-    if (grid[temp.first][temp.second] == '\\') {
-        if (state == 1) {
-            return look(make_pair(temp.first+1,temp.second),cur+1,0);
+int answer = 0;
+vector<int> first = {3,2,1,0};
+vector<int> sec = {1,0,3,2};
+vector<int> changex = {0,1,0,-1};
+vector<int> changey = {-1,0,1,0};
+vector<string> grid;
+void dfs(pair<int,int> cords, int dir) {
+    int result = 0;
+    while (0 <= cords.second && cords.second < n && 0 <= cords.first && cords.first < m) {
+        if (grid[cords.second][cords.first] == '\\') {
+            dir = first[dir];;
         }
         else {
-            return look(make_pair(temp.first,temp.second+1),cur+1,1);
+            dir = sec[dir];
         }
+        cords.first += changex[dir];
+        cords.second += changey[dir];
+        result += 1;
     }
-    else {
-        if (state == 1) {
-            return look(make_pair(temp.first-1,temp.second),cur+1,0);
-        }
-        else {
-            return look(make_pair(temp.first,temp.second-1),cur+1,1);
-        }
-    }
+    answer = max(answer,result);
+    return;
 }
-int32_t main(void) {
+int main(void) {
     cin >> n >> m;
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n ; i++) {
         string temp;
         cin >> temp;
         grid.push_back(temp);
     }
-    int answer = 0;
     for (int i = 0; i < n; i++) {
-        answer = max(look(make_pair(i,0), 0,1),answer);
+        dfs(make_pair(0,i),1);
+        dfs(make_pair(m-1,i),3);
     }
-    for (int j = 0; j < m; j++) {
-        answer = max(look(make_pair(0,j), 0,0),answer);
+    for (int i = 0; i < m; i++) {
+        dfs(make_pair(i,0),2);
+        dfs(make_pair(i,n-1),0);
     }
+    
     cout << answer << '\n';
 }
