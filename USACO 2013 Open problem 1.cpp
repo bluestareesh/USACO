@@ -9,84 +9,77 @@
 using namespace std;
 typedef long long ll;
 # define int ll
-int one = 0;
-int two = 1;
-int three = 0;
-int four = 1;
-int32_t main(void) {
-    int n;
-    cin >> n;
-    map<string,pair<int,int>> cords;
-    vector<vector<int>> malk = {{1,1,-1,-1},{1,-1,-1,1},{-1,-1,1,1},{-1,1,1-1}};
-    cords["FR"] = {1,1};
-    cords["FL"] = {0,1};
-    cords["RL"] = {0,0};
-    cords["RR"] = {1,0};
-    //y0+x1-x0,x0+y0-y1
-    int dir = 0;
-    for (int i = 0; i <n ; i++) {
-        string temp;
-        cin >> temp;
-        string fina =temp.substr(2,1);
-        string foo = temp.substr(0,2);
-        pair<int,int> temp2 = cords[foo];
-        if (fina == "P") {
-            for (auto i : cords) {
-                if (i.first == foo) {
-                    continue;
-                }
-                pair <int,int> temp3 = i.second;
-                temp3.first -= temp2.first;
-                temp3.second -= temp2.second;
-                pair <int,int> temp4 = {temp3.second,-temp3.first};
-                temp4.first += temp2.first;
-                temp4.second += temp2.second;
-                cords[i.first] = temp4;
-            }
-            dir = (dir+1) % 4;
-        }
-        else {
-            if (fina == "F") {
-                if (dir % 2 == 0) {
-                    cords[foo].second += malk[dir][0];
-                }
-                else {
-                    cords[foo].first += malk[dir][0];
-                }
-            }
-            if (fina == "B") {
-                if (dir % 2 == 0) {
-                    cords[foo].second += malk[dir][2];
-                }
-                else {
-                    cords[foo].first += malk[dir][2];
-                }
-            }
-            if (fina == "R") {
-                if (dir % 2 == 0) {
-                    cords[foo].first += malk[dir][1];
-                }
-                else {
-                    cords[foo].second += malk[dir][1];
-                }
-            }
-            if (fina == "L") {
-                if (dir % 2 == 0) {
-                    cords[foo].first += malk[dir][3];
-                }
-                else {
-                    cords[foo].second += malk[dir][3];
-                }
-            }
-        }
-        for (auto i : cords) {
-            //cout << i.second.first << ' ' << i.second.second << '\n';
-            one = min(one,i.second.first);
-            two = max(two,i.second.first);
-            three = min(three,i.second.second);
-            four = max(four,i.second.second);
-        }
-        //cout << "h\n";
+int n,k;
+int MAX_ADJ = 30;
+int f_pos;
+int num_choices(int pos1, int pos2,vector<int> nums)
+{
+  int total = 1;
+  for (int p=pos1; p<=pos2; p++)
+    total *= nums[p];
+  return total;
+}
+string get_cow(int o,vector<string> fj,vector<vector<string>> all,vector<int> nums)
+{
+  string s = "";
+  for (int p=0; p<f_pos; p++) {
+    if (p>0)  {
+        s += " ";
     }
-    cout << (two-one+1) * (four - three+1) << '\n';
+    s += all[p][o / num_choices(p+1, f_pos-1,nums)];
+    cout << p << ' ' << o << ' ' <<num_choices(p+1, f_pos-1,nums) << '\n';
+    o = o % num_choices(p+1, f_pos-1,nums); 
+  }
+  return s;
+}
+
+int bef(string s,vector<string> fj)
+{
+  int total = 0;
+  for (int i=0; i<n; i++)
+    if (fj[i] <= s) total++;
+  return total;
+}
+int32_t main(void) {
+    cin >> n >> k;
+    vector<vector<string>> all(MAX_ADJ,vector<string>());
+    vector<int> nums(MAX_ADJ,0);
+    vector<string> fj(n);
+    for (int i = 0; i < n; i++) {
+        string temp;
+        for (int j = 0; j < 4; j++) {
+            cin >> temp;
+        }
+        int pos = 0;
+        cin >> temp;
+        fj[i] = "";
+        while (temp != "cow.") {
+            if (pos > 0) {
+                fj[i] += ' ';
+            }
+            fj[i] += temp;
+            bool yes = 1;
+            for (int i = 0; i < all[pos].size(); i++) {
+                if (all[pos][i] == temp) {
+                    yes = 0;
+                    break;
+                }
+            }
+            if (yes) {
+                all[pos].push_back(temp);
+                nums[pos] += 1;
+            }
+            pos += 1;
+            cin >> temp;
+        }
+        f_pos = pos;
+    }
+    for (int i = 0; i < MAX_ADJ; i++) {
+        sort(all[i].begin(),all[i].end());
+    }
+    int answer = k-1;
+    while (answer- bef(get_cow(answer,fj,all,nums),fj) < k-1) {
+        answer += 1;
+    }
+    cout << get_cow(answer,fj,all,nums) << '\n';
 }
