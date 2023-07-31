@@ -11,45 +11,44 @@ typedef long long ll;
 int n;
 vector<pair<int,int>> x;
 map<int,int> closest;
-int r_answer = 0;
-using namespace std;
-void simu(map<int,int> need) {
-    need[-1] = -1;
-    for (int start=0; start<n; start++) {
-        int pos = start;
-        for (int count=0; count<n; count++) {
-            pos = closest[need[pos]];
+set<map<int,int>> count2;
+int answer = 0;
+void solve(map<int,int> pairs) {
+    for (int i = 1; i <= n; i++) {
+        int worm = i;
+        for (int j = 0; j < n; j++) {
+            worm = closest[pairs[worm]];
         }
-        if (pos != -1)  {
-            r_answer += 1;
-            return;
+        if (worm != 0) {
+            //for (auto i : pairs) {
+                //cout << i.first << ' ' << i.second<<'\n';
+            //}
+            count2.insert(pairs);
+            //cout << "next\n";
+            answer += 1;
         }
     }
-  return;
 }
-void answer(map<int,int> pais,set<int> check) {
-    if (check.size() == x.size()) {
-        simu(pais);
+void pairing(map<int,int> pairs,int paired) {
+    if (paired == n) {
+        solve(pairs);
         return;
     }
-    for (int i = 0; i < x.size(); i++) {
-        if (check.find(i) != check.end()) {
+    int i;
+    for (i = 1; i <= n; i++) {
+        if (pairs[i] == 0) {
+            break;
+        }
+    }
+    for (int j = i+1; j <= n; j++) {
+        if (pairs[j] != 0) {
             continue;
         }
-        check.insert(i);
-        for (int j = i+1; j < x.size(); j++) {
-            if (check.find(j) != check.end()) {
-                continue;
-            }
-            check.insert(j);
-            pais[i] = j;
-            pais[j] = i;
-            answer(pais,check);
-            pais.erase(i);
-            pais.erase(j);
-            check.erase(j);
-        }
-        check.erase(i);
+        pairs[i] = j;
+        pairs[j] = i;
+        pairing(pairs,paired + 2);
+        pairs[i] = 0;
+        pairs[j] = 0;
     }
 }
 int32_t main(void) {
@@ -58,31 +57,19 @@ int32_t main(void) {
         int temp,temp2;
         cin >> temp >> temp2;
         x.push_back(make_pair(temp,temp2));
-        closest[i] = -1;
     }
-    closest[-1] = -1;
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n ; j++) {
-            if (i == j) {
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (j == i) {
                 continue;
             }
-            if (x[i].first < x[j].first && x[i].second == x[j].second) {
-                if (closest[i] == -1) {
+            if (x[i-1].first < x[j-1].first && x[i-1].second == x[j-1].second) {
+                if (closest[i] == 0 || x[j].first - x[i].first > x[closest[i]].first - x[i].first) {
                     closest[i] = j;
-                }
-                else {
-                    int temp = closest[i];
-                    if (x[i].first - x[temp].first > x[i].first - x[j].first) {
-                        closest[i] = j;
-                    }
                 }
             }
         }
     }
-    //for (auto i : closest) {
-        //cout << i.first << ' '  << i.second << '\n';
-    //}
-    //cout << "lk" << '\n';
-    answer(map<int,int>(), set<int>());
-    cout << r_answer/2 << '\n';
+    pairing(map<int,int>(),0);
+    cout << count2.size() << '\n';
 }
